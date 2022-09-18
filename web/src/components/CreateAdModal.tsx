@@ -5,6 +5,9 @@ import axios from 'axios';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
+import * as Select from '@radix-ui/react-select';
+import { CheckIcon, ChevronDownIcon } from '@radix-ui/react-icons';
+
 import { Input } from './Form/Input';
 
 interface Game {
@@ -16,6 +19,7 @@ export function CreateAdModal() {
   const [games, setGames] = useState<Game[]>([]);
   const [weekDays, setWeekDays] = useState<string[]>([]);
   const [useVoiceChannel, setUseVoiceChannel] = useState(false);
+  const [useGameId, setGameId] = useState('');
 
   useEffect(() => {
     axios('http://localhost:3333/games').then(response => {
@@ -34,7 +38,7 @@ export function CreateAdModal() {
     }
 
     try {
-      await axios.post(`http://localhost:3333/games/${data.game}/ads`, {
+      await axios.post(`http://localhost:3333/games/${useGameId}/ads`, {
         name: data.name,
         yearsPlaying: Number(data.yearsPlaying),
         discord: data.discord,
@@ -59,7 +63,46 @@ export function CreateAdModal() {
 
         <form onSubmit={handleCreateAd} className='mt-8 flex flex-col gap-4'>
           <div className='flex flex-col gap-2'>
-            <label htmlFor="game" className='font-semibold'>Qual o game?</label>
+
+            <Select.Root
+              value={useGameId}
+              onValueChange={(value) => {
+                setGameId(value);
+              }}>
+              <Select.Trigger
+                className='bg-zinc-900 py-3 px-4 rounded text-sm flex'
+              >
+                <Select.Value placeholder="Selecione o game que deseja jogar" />
+                <Select.Icon className='ml-auto'>
+                  <ChevronDownIcon />
+                </Select.Icon>
+
+              </Select.Trigger>
+
+              <Select.Portal className='overflow-hidden'>
+                <Select.Content className='bg-zinc-900 text-white py-3 rounded overflow-hidden'>
+                  <Select.Viewport>
+                    {games.map((game) => {
+                      return (
+                        <Select.Item key={game.id} value={game.id} className='flex items-center relative pl-6 py-3 hover:bg-violet-500 rounded'>
+                          <Select.ItemText>
+                            {game.title}
+                          </Select.ItemText>
+
+                          <Select.ItemIndicator className='absolute left-0 inline-flex justify-center items-center w-6'>
+                            <CheckIcon />
+                          </Select.ItemIndicator>
+                        </Select.Item>
+
+                      )
+                    })}
+
+                  </Select.Viewport>
+                </Select.Content>
+              </Select.Portal>
+            </Select.Root>
+
+            {/* <label htmlFor="game" className='font-semibold'>Qual o game?</label> 
             <select
               id='game'
               name='game'
@@ -71,7 +114,7 @@ export function CreateAdModal() {
                 return <option key={game.id} value={game.id}>{game.title}</option>
               })}
 
-            </select>
+            </select> */}
           </div>
 
           <div className='flex flex-col gap-2'>
